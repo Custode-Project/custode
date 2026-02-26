@@ -1,0 +1,12 @@
+# CMake Files
+CMakeUserPresets.json
+**/CMakeCache.txt
+**/CMakeUserPresets.json
+**/CTestTestfile.cmake
+**/CPackConfig.cmake
+**/cmake_install.cmake
+**/install_manifest.txt
+**/compile_commands.json
+
+# Avoid stale docs
+/docs
