@@ -1,0 +1,116 @@
+@startuml class_diagram
+skinparam Linetype ortho
+
+enum FileSignature {
+    kNoSignature
+    kInvalidSignature
+    kValidSignature
+}
+
+class "ReadOnlyStore<T>" as ReadOnlyStore {
+    T value_
+    +get_value(void) : T
+    #ReadOnlyStore(T value)
+}
+
+class ContainerError {}
+ContainerError --|> StringReadOnlyStore
+
+
+class FileError
+FileError --|>ContainerError
+
+class "ReadOnlyStore<std::string>" as StringReadOnlyStore <<typedef>>
+class "ReadOnlyStore<unsigned char[]>" as Salt <<typedef>>
+class "ReadOnlyStore<std::unordered_map<std::string, SymmetricStore>>" as SymmetricStoreCollection
+class "ReadOnlyStore<std::unordered_map<std::string, AsymmetricStore>>" as AsymmetricStoreCollection
+class "ReadOnlyStore<std::unordered_map<std::string, PublicKey>>" as PublicKeyCollection 
+class "std::tuple<File, std::string>" as FileRolePair <<typedef>>
+
+class PublicKey
+PublicKey --|> StringReadOnlyStore
+
+class PrivateKey {
+    +CreateFromUserKeyfile(SymmetricStore keyfile, std::string_view username, std::string_view password) : std::variant<SymmetricStore, ContainerError>
+    +CreateFromKeyring(std::string_view username, std::string_view password) : std::variant<SymmetricStore, ContainerError>
+    +CreateFromGuestCredentials(SymmetricStore keyfile) : std::variant<SymmetricStore, ContainerError>
+}
+PrivateKey --|> StringReadOnlyStore
+PrivateKey --> SymmetricStore
+PrivateKey --> ContainerError
+
+class SymmetricKey
+SymmetricKey --|> StringReadOnlyStore
+
+class File {
+    -std::vector<std::bytes> data_
+    +CreateFromFilepath(std::string_view filepath) : std::variant<File, FileError>
+    +CheckSignature(PublicKey public_key) : FileSignature
+}
+File --> FileError
+File --> PublicKey
+File --> FileSignature
+
+class SessionHandler {
+    -std::string username_
+    -PrivateKey private_key_
+    #SessionHandler(username, keystore)
+    {static} +CreateUserFileSession(std::string_view username, std::string_view password, SymmetricStore keyfile) : std::variant<SessionHandler, ContainerError>
+    {static} +CreateUserKeyringSession(std::string_view username, std::string_view password, std::string_view package_name, std::string_view service_name) : std::variant<SessionHandler, ContainerError>
+    {static} +CreateGuestSession(SymmetricStore keyfile) : std::variant<SessionHandler, ContainerError>
+}
+SessionHandler "1" *-- "1" PrivateKey : container
+SessionHandler --> SymmetricStore
+SessionHandler --> ContainerError
+
+class SymmetricStore {
+    -Salt salt_
+    +Decrypt(SymmetricKey symmetric_key) : File
+    +CreateFromFile(File file) : std::variant<SymmetricStore, FileError>
+}
+SymmetricStore "1" *-- "1" Salt : contains
+SymmetricStore --> SymmetricKey
+SymmetricKey --> File
+SymmetricStore --> FileError
+
+class AsymmetricStore {
+    +Decrypt(PrivateKey private_key) : File
+    +CreateFromFile(File file) : std::variant<AsymmetricStore, FileError>
+}
+AsymmetricStore --> PrivateKey
+AsymmetricStore --> File
+AsymmetricStore --> FileError
+
+class PolicyHandler {
+    +IsValidPassword(std::string_view password) : bool
+    +CanUserAccessStore(std::string_view username, std::string_view id) : bool
+    +CreateFromFile(File file) : std::variant<PolicyHandler, ContainerError>
+}
+PolicyHandler --> File
+PolicyHandler --> ContainerError
+
+class SecureDataContainer {
+    -SessionHandler user_session_
+    -PolicyHandler policy_handler_
+    -SymmetricStoreCollection document_collection_
+    -SymmetricStoreCollection user_key_collection_
+    -AsymmetricStoreCollection document_master_key_collection_
+    -PublicKeyCollection user_public_keys_
+    -std::vector<FileRolePair> unencrypted_files_collection
+    +SetUserFileSession(std::string_view username, std::string_view password) : std::optional<ContainerError>
+    +SetUserKeyringSession(std::string_view username, std::string_view password, std::string_view package_name, std::string_view service_name) : std::optional<ContainerError>
+    +SetGuestSession() : std::optional<ContainerError>
+    +AddFile(FileRolePair document) : std::optional<ContainerError>
+    +GetAvailableDocuments() : std::variant<std::vector<std::string>, ContainerError>
+    +GetDocument(std::string_view document_id) : std::variant<File, ContainerError>
+    +Commit()
+}
+SecureDataContainer "1" o-- "0..1" PolicyHandler : "contains"
+SecureDataContainer "1" o-- "0..1" SymmetricStoreCollection : "contains"
+SecureDataContainer "1" o-- "0..1" AsymmetricStoreCollection : "contains"
+SecureDataContainer "1" o-- "0..1" PublicKeyCollection : "contains"
+SecureDataContainer --> SymmetricStore
+SecureDataContainer --> ContainerError
+SecureDataContainer --> File
+SecureDataContainer --> FileRolePair
+@enduml
