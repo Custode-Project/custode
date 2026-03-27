@@ -6,5 +6,10 @@ project(
         LANGUAGES CXX
 )
 
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
+    message(FATAL_ERROR "In-source builds are not permitted.")
+endif ()
 add_subdirectory(src)
 add_subdirectory(tools)
