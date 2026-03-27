@@ -16,5 +16,13 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/.gitignore" "/*")
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     message(FATAL_ERROR "In-source builds are not permitted.")
 endif ()
+
+# Check for and enable Interprocedural Optimization
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ipo_supported})
+if (ipo_supported)
+    message("IPO enabled")
+endif ()
 add_subdirectory(src)
 add_subdirectory(tools)
