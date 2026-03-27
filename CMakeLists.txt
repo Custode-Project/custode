@@ -30,6 +30,24 @@ endif ()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
+# Setup Doxygen
+find_package(Doxygen REQUIRED)
+
+if (DOXYGEN_FOUND)
+    set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
+    set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION})
+    set(DOXYGEN_PROJECT_BRIEF ${PROJECT_DESCRIPTION})
+    set(DOXYGEN_EXTRACT_ALL YES)
+    set(DOXYGEN_RECURSIVE YES)
+    set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs")
+
+    doxygen_add_docs(
+            docs
+            ${PROJECT_SOURCE_DIR}/src
+            COMMENT "Generating documentation"
+    )
+endif ()
+
 # Add subdirectories
 add_subdirectory(src)
 add_subdirectory(tools)
