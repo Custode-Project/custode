@@ -1,3 +1,16 @@
+# Source files in src go here
+# This is not recursive
+# Subdirectories for the same target should be added with the add_subdirectory() command
+# They should have their own CMakeLists.txt file with the command target_sources()
+# Which will link additional sources to the existing target without creating a disparate one
+# The subdirectory will also have its own include directory
+# The CMakeLists.txt file should also have a target_include_directories() command like the one below
+# However, if the content of the subdirectory is sufficiently large
+# Consider making it its own target to avoid unnecessary recompilation
+add_library(Custodes_SDC
+        # list of cpp files follows
+        main.cpp
+)
 
 # Header files go in include directory and are automatically discovered
 target_include_directories(Custodes_SDC PUBLIC include)
