@@ -10,6 +10,9 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Create .gitignore in build dir on initial configuration
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/.gitignore" "/*")
+
 if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     message(FATAL_ERROR "In-source builds are not permitted.")
 endif ()
