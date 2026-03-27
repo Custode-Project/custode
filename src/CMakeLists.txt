@@ -43,3 +43,12 @@ target_compile_options(
         $<$<CONFIG:MinSizeRel>:-Os -DNDEBUG>
         $<$<CONFIG:RelWithDebInfo>:-O2 -g>
 )
+
+if(CSDC_BUILD_TESTING)
+    # Configure testing
+    add_executable(CSDC_test EXCLUDE_FROM_ALL)
+    target_link_libraries(CSDC_test GTest::gtest_main)
+    add_subdirectory(tests)
+    include(GoogleTest)
+    gtest_discover_tests(CSDC_test)
+endif ()

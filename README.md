@@ -58,3 +58,8 @@ You can also specify the build configuration as Debug, Release, MinSizeRel, RelW
 ```shell
 cmake --build ./build --config=Release
 ```
+
+To include the GTest suite set the `CSDC_BUILD_TESTING` flag (default is OFF):
+```shell
+cmake -S . -B ./build -G "Ninja Multi-Config" -DCSDC_BUILD_TESTING=ON
+```

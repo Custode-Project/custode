@@ -10,6 +10,12 @@ project(
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Custom options
+option(CSDC_BUILD_TESTING "Build the test suite" OFF)
+
+# Get FetchContent for later use
+include(FetchContent)
+
 # Create .gitignore in build dir on initial configuration
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/.gitignore" "/*")
 
@@ -38,6 +44,19 @@ if (DOXYGEN_FOUND)
             ${PROJECT_SOURCE_DIR}/src
             COMMENT "Generating documentation"
     )
+endif ()
+
+if (CSDC_BUILD_TESTING)
+    # Setup GoogleTest
+    FetchContent_Declare(
+            googletest
+            # Regularly update hash to latest version
+            URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+    enable_testing()
 endif ()
 
 # Default build configuration as Debug
