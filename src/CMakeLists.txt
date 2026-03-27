@@ -1,8 +1,8 @@
 
-add_library(Custodes_SDC main.cpp)
-
+# Header files go in include directory and are automatically discovered
 target_include_directories(Custodes_SDC PUBLIC include)
 
+# Compile definitions by build configuration
 target_compile_definitions(
         Custodes_SDC PRIVATE
 
@@ -22,6 +22,7 @@ target_compile_definitions(
         $<$<CONFIG:RelWithDebInfo>:ENABLE_PROFILING>
 )
 
+# Compile options by build configuration
 target_compile_options(
         Custodes_SDC PRIVATE
         $<$<CONFIG:Debug>:-g -O0 -Wall>
