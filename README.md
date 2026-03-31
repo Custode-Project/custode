@@ -63,3 +63,40 @@ To include the GTest suite set the `CSDC_BUILD_TESTING` flag (default is OFF):
 ```shell
 cmake -S . -B ./build -G "Ninja Multi-Config" -DCSDC_BUILD_TESTING=ON
 ```
+
+## .cpol Files
+
+Custodes Policy files (CPol) are written in Custodes Obvious Minimal Language (COML).  At its core, COML is a TOML file with a reserved block under the heading `[roles]` which does not adhere to the standard TOML syntax rules.
+
+### TOML Configuration
+
+#### Password Rules (`[passwords]`)
+
+| Key              | Default | Description                                                  |
+| ---------------- | ------- | ------------------------------------------------------------ |
+| validation_regex | None    | Ignore all other password settings and use provided pattern. |
+| min_length       | None    | Minimum allowed password length.                             |
+| max_length       | None    | Maximum allowed password length.                             |
+| require_capital  | false   | Require a capital letter in password.                        |
+| require_number   | false   | Require a number in password.                                |
+| require_symbol   | false   | Require a special character in password.                     |
+| max_repetition   | None    | Permitted number of concurrent, identical characters. e.g. "aaaa" or "4444" |
+| max_sequence     | None    | Permitted number of sequential characters. e.g. "1234" or "abcd" |
+| min_entropy      | 0       | Minimum allowed entropy score.                               |
+| max_attempts     | None    | Max allowed password entry attempts.                         |
+
+#### Logging (`[logging]`)
+
+| Key   | Default | Description                                      |
+| ----- | ------- | ------------------------------------------------ |
+| level | info    | Set log output level. (debug, info, warn, error) |
+
+### Roles Section (`[roles]`)
+
+The roles section follows a declarative insertion/deletion format:
+
+**Insertion:** `+ <role|document> <user>...`
+
+**Deletion:** `- <role|document> <user>...`
+
+All insertion rules are executed before any deletion rule, regardless of order.  This ensures minimal privilege is granted and additional privileges cannot be granted by later insertions without first removing the deletion.  A deletion on a role, document, or user that has not been added is ignored, this permits explicit blacklisting.
